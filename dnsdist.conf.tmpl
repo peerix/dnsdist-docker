@@ -1,15 +1,23 @@
-newServer({address="${PDNS_resolver_server:-172.10.10.2:5300}", pool="resolver_external"})
-auth_server = "${PDNS_auth_server:-172.10.10.3:5301}"
-${PDNS_auth_server_enabled:+newServer({address=auth_server, pool="auth_external"}})
+newServer({address="${PDNS_resolver_server:-127.0.0.1:5300}", qps=1, pool="resolver_internal"})
+auth_server = {address="${PDNS_auth_server:-127.0.0.1:5301}", pool="auth_external"}
+${PDNS_auth_server:+newServer(auth_server)}
 pc = newPacketCache(${PDNS_packet_cache:-100000})
 getPool("resolver_external"):setCache(pc)
 
-setACL({})
-addACL("0.0.0.0/0")
-addACL("::0/0")
-controlSocket("${control_socket_ip:-127.0.0.1}")
+setServerPolicy(leastOutstanding)
 
-addLocal("0.0.0.0:53")
-addLocal("[::]:53")
+setACL({})
+addACL("${PDNS_allow_acl:-127.0.0.1/32}")
+controlSocket("${PDNS_control_socket:-127.0.0.1}")
+setConsoleACL("${PDNS_control_socket_acl:-127.0.0.1}")
+
+setLocal("${PDNS_local_ipv4:-0.0.0.0:53}")
+addLocal("${PDNS_local_ipv6:-[::]:53}")
 
 webserver('${PDNS_webserver:-127.0.0.1:8083}', '${PDNS_webserver_password:-pdns-recursor}', '${PDNS_webserver_api_key:-apikey}')
+
+recursor_ips = newNMG()
+recursor_ips:addMask('0.0.0.0/0') -- open resolver ipv4
+recursor_ips:addMask('::/0') -- open resolver ipv6
+
+addAction(NetmaskGroupRule(recursor_ips), PoolAction('resolver_internal'))

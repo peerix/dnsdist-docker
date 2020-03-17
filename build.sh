@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker build -t argirov/pdns-dnsdist . -f Dockerfile
+docker build -t peerix/dnsdist . -f Dockerfile --network=host
