@@ -1,5 +1,4 @@
 #!/bin/sh
-#	-e PDNS_auth_server=172.10.10.2:5301 \
 
 docker run -d -it \
 	--name dnsdist \
