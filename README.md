@@ -1,4 +1,4 @@
-# PowerDNS's dnsdist Docker image
+# PowerDNS' dnsdist Docker image
 
 General purpose dndist container used to direct traffic to resolvers or
 authoritative name server
